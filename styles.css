@@ -441,6 +441,92 @@ button { font-family: inherit; cursor: pointer; }
 }
 .modal-actions .buy-btn { flex: 2; }
 
+/* ===== PlayPal (Fake-PayPal) ===== */
+.playpal-modal {
+  background: #fff;
+  color: #111;
+  text-align: center;
+}
+.pp-logo {
+  font-size: 2rem;
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -1px;
+}
+.pp-logo em { color: #003087; font-style: italic; }
+.pp-logo strong { color: #0070ba; }
+.pp-hint { color: #6b7280; font-size: 0.82rem; margin: 6px 0 18px; }
+
+.pp-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f5f7fa;
+  border: 1px solid #e3e8ef;
+  border-radius: 12px;
+  padding: 12px 16px;
+  text-align: left;
+}
+.pp-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #e8f1fb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+}
+.pp-email { font-weight: 700; font-size: 0.92rem; }
+.pp-balance { font-size: 0.78rem; color: #6b7280; }
+.pp-balance strong { color: #0070ba; }
+
+.pp-amount-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 18px 0;
+  padding: 14px 4px;
+  border-top: 1px solid #e3e8ef;
+  border-bottom: 1px solid #e3e8ef;
+  font-size: 1.05rem;
+}
+.pp-amount-row strong { font-size: 1.4rem; color: #003087; }
+
+.pp-pay-btn {
+  flex: 2;
+  background: #0070ba;
+  border: none;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1rem;
+  padding: 14px;
+  border-radius: 999px;
+  transition: transform 0.15s, background 0.15s;
+}
+.pp-pay-btn:hover { background: #003087; transform: scale(1.02); }
+.playpal-modal .ghost-btn { border-radius: 999px; }
+
+.pp-processing {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: #0070ba;
+  font-weight: 600;
+  font-size: 0.92rem;
+  margin: 14px 0;
+}
+.pp-spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid #cfe5f5;
+  border-top-color: #0070ba;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
 .success-modal { text-align: center; }
 .success-emoji { font-size: 4rem; animation: bounce 1s ease infinite; }
 .success-modal p { color: var(--muted); margin: 10px 0 22px; }

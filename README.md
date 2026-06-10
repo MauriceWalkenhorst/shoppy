@@ -9,9 +9,12 @@ Paket zugestellt wird. 🎉
 ## Was kann Shoppy?
 
 - 👗 **Echte Produkte**: Klamotten & mehr mit echten Produktfotos (Fake Store API)
+- 💎 **Luxus-Kategorie**: realistische Traum-Produkte von 980 € bis 24.999 €
 - 🛒 **Warenkorb** mit Mengen, Animationen und Konfetti
 - 💰 **Spielgeld-Wallet**: Start mit 500 €, gratis auffüllbar per Klick aufs 💰
-- 💳 **Checkout** mit Fantasie-Zahlungsmethoden ("Spielgeld", "Wunschdenken", …)
+- 🅿️ **PlayPal**: simulierte PayPal-artige Bezahlung mit 1 Mio. € Fantasie-Guthaben –
+  fühlt sich echt an, ist aber zu 100 % unecht
+- 💳 **Checkout** mit weiteren Fantasie-Zahlungsmethoden ("Spielgeld", "Wunschdenken")
 - 🛵 **Live-Liefer-Tracking**: Fahrer mit Name & Fahrzeug bewegt sich in Echtzeit
   auf einer OpenStreetMap-Karte durch Berlin, mit ETA-Countdown, Status-Schritten
   und Live-Feed ("Murat hat einen Hund gestreichelt 🐕")
@@ -28,8 +31,21 @@ python3 -m http.server 8000
 # dann http://localhost:8000 öffnen
 ```
 
-Oder `index.html` direkt im Browser öffnen. Fürs Hosting reicht GitHub Pages
-(Settings → Pages → Branch auswählen).
+Oder `index.html` direkt im Browser öffnen.
+
+**Live-Version (GitHub Pages, Branch `gh-pages`):**
+https://mauricewalkenhorst.github.io/shoppy/
+
+## 📱 Auf dem Smartphone nutzen
+
+Shoppy ist eine **PWA (Progressive Web App)** – einfach die Live-URL am Handy
+öffnen und installieren:
+
+- **Android (Chrome):** Menü ⋮ → "App installieren" / "Zum Startbildschirm hinzufügen"
+- **iPhone (Safari):** Teilen-Symbol → "Zum Home-Bildschirm"
+
+Danach startet Shoppy mit eigenem Icon im Vollbild wie eine echte App und
+funktioniert dank Service Worker auch grundlegend offline.
 
 ## 🧩 Browser-Addon: Fake-Shoppen bei Zara, Amazon & Zalando
 

@@ -4,7 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Shoppy – Shoppen ohne Reue 🛍️</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>" />
+  <meta name="theme-color" content="#0f0f14" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="icons/icon-192.png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
@@ -124,9 +129,9 @@
       <div class="field">
         <span>Zahlungsmethode</span>
         <div class="pay-options">
-          <label><input type="radio" name="pay" checked /> 💰 Spielgeld</label>
-          <label><input type="radio" name="pay" /> 🪙 Fantasie-Coins</label>
-          <label><input type="radio" name="pay" /> 🧚 Wunschdenken</label>
+          <label><input type="radio" name="pay" value="spielgeld" checked /> 💰 Spielgeld-Wallet</label>
+          <label><input type="radio" name="pay" value="playpal" /> 🅿️ PlayPal <span class="muted">(wie PayPal – nur 100 % unecht)</span></label>
+          <label><input type="radio" name="pay" value="wunsch" /> 🧚 Wunschdenken</label>
         </div>
       </div>
 
@@ -138,6 +143,36 @@
       <div class="modal-actions">
         <button class="ghost-btn" id="cancel-checkout">Abbrechen</button>
         <button class="buy-btn" id="confirm-buy">Jetzt kaufen 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== PlayPal-Zahlung (Simulation) ===== -->
+  <div class="modal-backdrop hidden" id="playpal-modal">
+    <div class="modal playpal-modal">
+      <div class="pp-logo"><em>Play</em><strong>Pal</strong></div>
+      <p class="pp-hint">Simulation – hier fließt garantiert kein echtes Geld. 😌</p>
+
+      <div class="pp-account">
+        <div class="pp-avatar">🦄</div>
+        <div>
+          <div class="pp-email" id="pp-email">du@spielgeld.de</div>
+          <div class="pp-balance">PlayPal-Guthaben: <strong id="pp-balance">1.000.000,00 €</strong></div>
+        </div>
+      </div>
+
+      <div class="pp-amount-row">
+        <span>Du zahlst</span>
+        <strong id="pp-amount">0,00 €</strong>
+      </div>
+
+      <div class="pp-processing hidden" id="pp-processing">
+        <span class="pp-spinner"></span> <span id="pp-processing-text">Verbinde mit PlayPal…</span>
+      </div>
+
+      <div class="modal-actions" id="pp-actions">
+        <button class="ghost-btn" id="pp-cancel">Abbrechen</button>
+        <button class="pp-pay-btn" id="pp-pay">Jetzt bezahlen</button>
       </div>
     </div>
   </div>
@@ -158,5 +193,11 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script src="app.js"></script>
+  <script>
+    // PWA: Service Worker registrieren (macht Shoppy auf dem Handy installierbar)
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
+  </script>
 </body>
 </html>

@@ -10,11 +10,13 @@ const API_URL = "https://fakestoreapi.com/products";
 const CLOTHING_CATEGORIES = ["men's clothing", "women's clothing"];
 const CATEGORY_LABELS = {
   all: "✨ Alles",
+  luxury: "💎 Luxus",
   "men's clothing": "👔 Herren",
   "women's clothing": "👗 Damen",
   jewelery: "💍 Schmuck",
   electronics: "🎧 Gadgets",
 };
+const PLAYPAL_START_BALANCE = 1_000_000;
 const START_BALANCE = 500;
 const REFILL_AMOUNT = 500;
 const DELIVERY_DURATION_MS = 3 * 60 * 1000; // 3 Minuten "Lieferzeit"
@@ -52,6 +54,20 @@ const FALLBACK_PRODUCTS = [
   { id: 9010, title: "Seidenschal 'Aurora'", price: 39.9, category: "women's clothing", rating: { rate: 4.6, count: 121 }, emoji: "🧣" },
   { id: 9011, title: "Leder-Sneaker weiß", price: 99.0, category: "women's clothing", rating: { rate: 4.8, count: 277 }, emoji: "👟" },
   { id: 9012, title: "Flanellhemd Holzfäller-Edition", price: 44.99, category: "men's clothing", rating: { rate: 4.5, count: 389 }, emoji: "👔" },
+];
+
+// Luxus-Katalog: realistische, richtig teure Träume 💎 (immer verfügbar)
+const LUXURY_PRODUCTS = [
+  { id: 8001, title: "Schweizer Automatikuhr 'Royal Calibre 41' – Edelstahl/Gold", price: 14999, category: "luxury", rating: { rate: 4.9, count: 87 }, emoji: "⌚" },
+  { id: 8002, title: "Handgefertigte Leder-Handtasche 'Milano Grande' – Kalbsleder", price: 4850, category: "luxury", rating: { rate: 4.8, count: 142 }, emoji: "👜" },
+  { id: 8003, title: "Kaschmir-Mantel 'Grand Hotel' – 100 % Mongolisches Kaschmir", price: 2790, category: "luxury", rating: { rate: 4.9, count: 64 }, emoji: "🧥" },
+  { id: 8004, title: "Limitierte Designer-Sneaker 'Aurum Edition' – nur 500 Paar weltweit", price: 1899, category: "luxury", rating: { rate: 4.7, count: 231 }, emoji: "👟" },
+  { id: 8005, title: "Diamant-Ring 'Étoile' – 1,5 Karat, Weißgold 750", price: 12500, category: "luxury", rating: { rate: 5.0, count: 39 }, emoji: "💍" },
+  { id: 8006, title: "Seidenkleid 'Opéra de Paris' – Haute-Couture-Maßanfertigung", price: 6200, category: "luxury", rating: { rate: 4.8, count: 27 }, emoji: "👗" },
+  { id: 8007, title: "Pilotensonnenbrille 'Riviera 18k' – vergoldetes Titangestell", price: 1450, category: "luxury", rating: { rate: 4.6, count: 118 }, emoji: "🕶️" },
+  { id: 8008, title: "Lammleder-Jacke 'Midnight Racer' – Handarbeit aus Florenz", price: 3490, category: "luxury", rating: { rate: 4.8, count: 95 }, emoji: "🧥" },
+  { id: 8009, title: "Chronograph 'Le Mans Heritage' – Limited Edition mit Zertifikat", price: 24999, category: "luxury", rating: { rate: 4.9, count: 51 }, emoji: "⌚" },
+  { id: 8010, title: "Krokodilleder-Gürtel 'Imperial' mit Palladium-Schließe", price: 980, category: "luxury", rating: { rate: 4.5, count: 73 }, emoji: "🥇" },
 ];
 
 // ---------- State ----------
@@ -131,6 +147,7 @@ async function loadProducts() {
     console.warn("Produkt-API nicht erreichbar, nutze Fallback-Katalog:", err);
     products = FALLBACK_PRODUCTS;
   }
+  products = [...LUXURY_PRODUCTS, ...products];
   renderCategoryNav();
   renderProducts();
 }
@@ -339,16 +356,32 @@ function closeCheckout() {
   $("#checkout-modal").classList.add("hidden");
 }
 
+function selectedPayment() {
+  return document.querySelector('input[name="pay"]:checked')?.value || "spielgeld";
+}
+
 function confirmPurchase() {
   const total = cartTotal();
-  if (total > balance) {
-    toast("😅 Zu wenig Spielgeld! Tipp aufs 💰 oben – Nachschub ist gratis.");
+  const method = selectedPayment();
+
+  if (method === "playpal") {
+    openPlayPal(total);
     return;
   }
-  balance -= total;
-  saveBalance();
-  renderWallet();
+  if (method === "spielgeld") {
+    if (total > balance) {
+      toast("😅 Zu wenig Spielgeld! Tipp aufs 💰 oben – oder zahl per PlayPal. 😉");
+      return;
+    }
+    balance -= total;
+    saveBalance();
+    renderWallet();
+  }
+  // "Wunschdenken" ist immer gedeckt ✨
+  finalizeOrder(total);
+}
 
+function finalizeOrder(total) {
   const driver = DRIVERS[Math.floor(Math.random() * DRIVERS.length)];
   activeOrder = {
     id: "SHPY-" + Date.now().toString(36).toUpperCase(),
@@ -369,6 +402,61 @@ function confirmPurchase() {
 
   bigConfetti();
   $("#success-modal").classList.remove("hidden");
+}
+
+// ---------- PlayPal (simulierte PayPal-Zahlung) ----------
+let ppBalance = loadJSON("shoppy_pp_balance", PLAYPAL_START_BALANCE);
+let ppPendingTotal = 0;
+let ppTimer = null;
+
+function openPlayPal(total) {
+  ppPendingTotal = total;
+  $("#pp-amount").textContent = formatEUR(total);
+  $("#pp-balance").textContent = formatEUR(ppBalance);
+  $("#pp-processing").classList.add("hidden");
+  $("#pp-actions").classList.remove("hidden");
+  $("#playpal-modal").classList.remove("hidden");
+}
+
+function closePlayPal() {
+  clearTimeout(ppTimer);
+  $("#playpal-modal").classList.add("hidden");
+}
+
+function payWithPlayPal() {
+  // PlayPal ist quasi unerschöpflich – aber wenn doch mal leer: auffüllen
+  if (ppPendingTotal > ppBalance) {
+    ppBalance += PLAYPAL_START_BALANCE;
+    toast("🦄 PlayPal-Bonus! Dein Guthaben wurde magisch aufgefüllt.");
+  }
+
+  const processing = $("#pp-processing");
+  const textEl = $("#pp-processing-text");
+  $("#pp-actions").classList.add("hidden");
+  processing.classList.remove("hidden");
+
+  const steps = [
+    "Verbinde mit PlayPal…",
+    "Prüfe dein Fantasie-Guthaben…",
+    "Zahlung wird autorisiert…",
+    "✅ Zahlung bestätigt!",
+  ];
+  let i = 0;
+  textEl.textContent = steps[i];
+  const next = () => {
+    i++;
+    if (i < steps.length) {
+      textEl.textContent = steps[i];
+      ppTimer = setTimeout(next, i === steps.length - 1 ? 700 : 900);
+    } else {
+      ppBalance -= ppPendingTotal;
+      saveJSON("shoppy_pp_balance", ppBalance);
+      closePlayPal();
+      closeCheckout();
+      finalizeOrder(ppPendingTotal);
+    }
+  };
+  ppTimer = setTimeout(next, 900);
 }
 
 // ---------- Ansichten ----------
@@ -549,6 +637,8 @@ $("#drawer-backdrop").addEventListener("click", closeCart);
 $("#checkout-btn").addEventListener("click", () => { closeCart(); openCheckout(); });
 $("#cancel-checkout").addEventListener("click", closeCheckout);
 $("#confirm-buy").addEventListener("click", confirmPurchase);
+$("#pp-pay").addEventListener("click", payWithPlayPal);
+$("#pp-cancel").addEventListener("click", closePlayPal);
 $("#goto-tracking").addEventListener("click", showTracking);
 $("#back-to-shop").addEventListener("click", showShop);
 $("#turbo-btn").addEventListener("click", turboDelivery);
