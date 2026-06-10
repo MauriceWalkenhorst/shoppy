@@ -6,21 +6,42 @@
 "use strict";
 
 // ---------- Konfiguration ----------
-const API_URL = "https://fakestoreapi.com/products";
-const CLOTHING_CATEGORIES = ["men's clothing", "women's clothing"];
-const CATEGORY_LABELS = {
-  all: "✨ Alles",
-  luxury: "💎 Luxus",
-  "men's clothing": "👔 Herren",
-  "women's clothing": "👗 Damen",
-  jewelery: "💍 Schmuck",
-  electronics: "🎧 Gadgets",
+// Produktdaten: DummyJSON liefert realistische Produktfotos auf Weiß
+const API_BASE = "https://dummyjson.com/products/category/";
+const SOURCE_CATEGORIES = {
+  "womens-dresses": "damen",
+  "tops": "damen",
+  "mens-shirts": "herren",
+  "womens-shoes": "schuhe",
+  "mens-shoes": "schuhe",
+  "womens-bags": "accessoires",
+  "sunglasses": "accessoires",
+  "womens-watches": "luxus",
+  "mens-watches": "luxus",
+  "womens-jewellery": "luxus",
 };
+const CATEGORY_LABELS = {
+  all: "Alles",
+  damen: "Damen",
+  herren: "Herren",
+  schuhe: "Schuhe",
+  accessoires: "Accessoires",
+  luxus: "💎 Luxus",
+  sale: "% Sale",
+};
+const CATEGORY_ORDER = ["all", "damen", "herren", "schuhe", "accessoires", "luxus", "sale"];
+const FAKE_BRANDS = ["NORDMARK", "ELARA", "KIONO", "WESTBROOK & CO.", "ATELIER NEUF", "VELA STUDIO"];
 const PLAYPAL_START_BALANCE = 1_000_000;
 const START_BALANCE = 500;
 const REFILL_AMOUNT = 500;
-const DELIVERY_DURATION_MS = 3 * 60 * 1000; // 3 Minuten "Lieferzeit"
 const EUR_PER_USD = 0.92;
+
+// Versandarten: Preis + simulierte "Lieferzeit"
+const SHIPPING_OPTIONS = {
+  standard: { label: "Standardversand", cost: 0, duration: 5 * 60 * 1000 },
+  express: { label: "Expressversand", cost: 4.9, duration: 2 * 60 * 1000 },
+  sameday: { label: "Same-Minute-Delivery", cost: 9.9, duration: 60 * 1000 },
+};
 
 const DRIVERS = [
   { name: "Murat", avatar: "🧔", vehicle: "Vespa Primavera, rot" },
@@ -42,32 +63,31 @@ const FEED_TEMPLATES = [
 
 // Fallback-Katalog, falls die Produkt-API nicht erreichbar ist
 const FALLBACK_PRODUCTS = [
-  { id: 9001, title: "Oversized Hoodie 'Cloud Nine'", price: 49.99, category: "men's clothing", rating: { rate: 4.8, count: 412 }, emoji: "🧥" },
-  { id: 9002, title: "Vintage Denim Jacke", price: 79.9, category: "women's clothing", rating: { rate: 4.6, count: 287 }, emoji: "🧥" },
-  { id: 9003, title: "Basic T-Shirt 3er-Pack", price: 24.99, category: "men's clothing", rating: { rate: 4.4, count: 1031 }, emoji: "👕" },
-  { id: 9004, title: "Sommerkleid 'Riviera'", price: 59.0, category: "women's clothing", rating: { rate: 4.9, count: 198 }, emoji: "👗" },
-  { id: 9005, title: "Cargo-Hose Streetwear", price: 64.5, category: "men's clothing", rating: { rate: 4.3, count: 356 }, emoji: "👖" },
-  { id: 9006, title: "Strickpullover Merino", price: 89.0, category: "women's clothing", rating: { rate: 4.7, count: 164 }, emoji: "🧶" },
-  { id: 9007, title: "Sneaker 'Dopamine Run'", price: 119.99, category: "men's clothing", rating: { rate: 4.9, count: 845 }, emoji: "👟" },
-  { id: 9008, title: "Wollmantel 'Berlin Winter'", price: 149.0, category: "women's clothing", rating: { rate: 4.5, count: 92 }, emoji: "🧥" },
-  { id: 9009, title: "Beanie mit Patch", price: 19.99, category: "men's clothing", rating: { rate: 4.2, count: 503 }, emoji: "🧢" },
-  { id: 9010, title: "Seidenschal 'Aurora'", price: 39.9, category: "women's clothing", rating: { rate: 4.6, count: 121 }, emoji: "🧣" },
-  { id: 9011, title: "Leder-Sneaker weiß", price: 99.0, category: "women's clothing", rating: { rate: 4.8, count: 277 }, emoji: "👟" },
-  { id: 9012, title: "Flanellhemd Holzfäller-Edition", price: 44.99, category: "men's clothing", rating: { rate: 4.5, count: 389 }, emoji: "👔" },
+  { id: 9001, title: "Oversized Hoodie 'Cloud Nine'", brand: "NORDMARK", price: 49.99, category: "herren", discount: 0, rating: { rate: 4.8, count: 412 }, emoji: "🧥" },
+  { id: 9002, title: "Vintage Denim Jacke", brand: "ELARA", price: 79.9, category: "damen", discount: 20, rating: { rate: 4.6, count: 287 }, emoji: "🧥" },
+  { id: 9003, title: "Basic T-Shirt 3er-Pack", brand: "KIONO", price: 24.99, category: "herren", discount: 0, rating: { rate: 4.4, count: 1031 }, emoji: "👕" },
+  { id: 9004, title: "Sommerkleid 'Riviera'", brand: "VELA STUDIO", price: 59.0, category: "damen", discount: 0, rating: { rate: 4.9, count: 198 }, emoji: "👗" },
+  { id: 9005, title: "Cargo-Hose Streetwear", brand: "WESTBROOK & CO.", price: 64.5, category: "herren", discount: 15, rating: { rate: 4.3, count: 356 }, emoji: "👖" },
+  { id: 9006, title: "Strickpullover Merino", brand: "ATELIER NEUF", price: 89.0, category: "damen", discount: 0, rating: { rate: 4.7, count: 164 }, emoji: "🧶" },
+  { id: 9007, title: "Sneaker 'Dopamine Run'", brand: "NORDMARK", price: 119.99, category: "schuhe", discount: 0, rating: { rate: 4.9, count: 845 }, emoji: "👟" },
+  { id: 9008, title: "Wollmantel 'Berlin Winter'", brand: "ELARA", price: 149.0, category: "damen", discount: 30, rating: { rate: 4.5, count: 92 }, emoji: "🧥" },
+  { id: 9009, title: "Beanie mit Patch", brand: "KIONO", price: 19.99, category: "accessoires", discount: 0, rating: { rate: 4.2, count: 503 }, emoji: "🧢" },
+  { id: 9010, title: "Seidenschal 'Aurora'", brand: "VELA STUDIO", price: 39.9, category: "accessoires", discount: 0, rating: { rate: 4.6, count: 121 }, emoji: "🧣" },
+  { id: 9011, title: "Leder-Sneaker weiß", brand: "ATELIER NEUF", price: 99.0, category: "schuhe", discount: 10, rating: { rate: 4.8, count: 277 }, emoji: "👟" },
+  { id: 9012, title: "Flanellhemd Holzfäller-Edition", brand: "WESTBROOK & CO.", price: 44.99, category: "herren", discount: 0, rating: { rate: 4.5, count: 389 }, emoji: "👔" },
 ];
 
-// Luxus-Katalog: realistische, richtig teure Träume 💎 (immer verfügbar)
+// Luxus-Katalog als Offline-Fallback (online kommen Luxus-Artikel mit echten
+// Fotos aus den Uhren-/Taschen-/Schmuck-Kategorien der Produkt-API)
 const LUXURY_PRODUCTS = [
-  { id: 8001, title: "Schweizer Automatikuhr 'Royal Calibre 41' – Edelstahl/Gold", price: 14999, category: "luxury", rating: { rate: 4.9, count: 87 }, emoji: "⌚" },
-  { id: 8002, title: "Handgefertigte Leder-Handtasche 'Milano Grande' – Kalbsleder", price: 4850, category: "luxury", rating: { rate: 4.8, count: 142 }, emoji: "👜" },
-  { id: 8003, title: "Kaschmir-Mantel 'Grand Hotel' – 100 % Mongolisches Kaschmir", price: 2790, category: "luxury", rating: { rate: 4.9, count: 64 }, emoji: "🧥" },
-  { id: 8004, title: "Limitierte Designer-Sneaker 'Aurum Edition' – nur 500 Paar weltweit", price: 1899, category: "luxury", rating: { rate: 4.7, count: 231 }, emoji: "👟" },
-  { id: 8005, title: "Diamant-Ring 'Étoile' – 1,5 Karat, Weißgold 750", price: 12500, category: "luxury", rating: { rate: 5.0, count: 39 }, emoji: "💍" },
-  { id: 8006, title: "Seidenkleid 'Opéra de Paris' – Haute-Couture-Maßanfertigung", price: 6200, category: "luxury", rating: { rate: 4.8, count: 27 }, emoji: "👗" },
-  { id: 8007, title: "Pilotensonnenbrille 'Riviera 18k' – vergoldetes Titangestell", price: 1450, category: "luxury", rating: { rate: 4.6, count: 118 }, emoji: "🕶️" },
-  { id: 8008, title: "Lammleder-Jacke 'Midnight Racer' – Handarbeit aus Florenz", price: 3490, category: "luxury", rating: { rate: 4.8, count: 95 }, emoji: "🧥" },
-  { id: 8009, title: "Chronograph 'Le Mans Heritage' – Limited Edition mit Zertifikat", price: 24999, category: "luxury", rating: { rate: 4.9, count: 51 }, emoji: "⌚" },
-  { id: 8010, title: "Krokodilleder-Gürtel 'Imperial' mit Palladium-Schließe", price: 980, category: "luxury", rating: { rate: 4.5, count: 73 }, emoji: "🥇" },
+  { id: 8001, title: "Schweizer Automatikuhr 'Royal Calibre 41' – Edelstahl/Gold", brand: "MAISON AURÈLE", price: 14999, category: "luxus", discount: 0, rating: { rate: 4.9, count: 87 }, emoji: "⌚" },
+  { id: 8002, title: "Handgefertigte Leder-Handtasche 'Milano Grande' – Kalbsleder", brand: "LUNARD", price: 4850, category: "luxus", discount: 0, rating: { rate: 4.8, count: 142 }, emoji: "👜" },
+  { id: 8003, title: "Kaschmir-Mantel 'Grand Hotel' – 100 % Mongolisches Kaschmir", brand: "MAISON AURÈLE", price: 2790, category: "luxus", discount: 0, rating: { rate: 4.9, count: 64 }, emoji: "🧥" },
+  { id: 8004, title: "Limitierte Designer-Sneaker 'Aurum Edition' – nur 500 Paar weltweit", brand: "LUNARD", price: 1899, category: "luxus", discount: 0, rating: { rate: 4.7, count: 231 }, emoji: "👟" },
+  { id: 8005, title: "Diamant-Ring 'Étoile' – 1,5 Karat, Weißgold 750", brand: "ÉTOILE PARIS", price: 12500, category: "luxus", discount: 0, rating: { rate: 5.0, count: 39 }, emoji: "💍" },
+  { id: 8006, title: "Seidenkleid 'Opéra de Paris' – Haute-Couture-Maßanfertigung", brand: "ÉTOILE PARIS", price: 6200, category: "luxus", discount: 0, rating: { rate: 4.8, count: 27 }, emoji: "👗" },
+  { id: 8007, title: "Pilotensonnenbrille 'Riviera 18k' – vergoldetes Titangestell", brand: "LUNARD", price: 1450, category: "luxus", discount: 0, rating: { rate: 4.6, count: 118 }, emoji: "🕶️" },
+  { id: 8008, title: "Chronograph 'Le Mans Heritage' – Limited Edition mit Zertifikat", brand: "MAISON AURÈLE", price: 24999, category: "luxus", discount: 0, rating: { rate: 4.9, count: 51 }, emoji: "⌚" },
 ];
 
 // ---------- State ----------
@@ -75,6 +95,7 @@ let products = [];
 let activeCategory = "all";
 let searchTerm = "";
 let cart = loadJSON("shoppy_cart", {});
+let wishlist = new Set(loadJSON("shoppy_wishlist", []));
 let balance = loadJSON("shoppy_balance", null);
 let activeOrder = loadJSON("shoppy_order", null);
 let deliverySim = null;
@@ -130,37 +151,61 @@ function bigConfetti() {
 }
 
 // ---------- Produkte laden ----------
+function mapApiProduct(p, category) {
+  let price = Math.round(p.price * EUR_PER_USD * 100) / 100;
+  // Luxus-Artikel mit Discounter-Preis auf realistisches Luxus-Niveau heben
+  if (category === "luxus" && price < 500) {
+    price = Math.round(price * 25) - 0.01;
+  }
+  const discount = Math.round(p.discountPercentage || 0);
+  return {
+    id: "dj-" + p.id,
+    title: p.title,
+    brand: p.brand || FAKE_BRANDS[p.id % FAKE_BRANDS.length],
+    price,
+    category,
+    discount: discount >= 8 ? discount : 0,
+    rating: { rate: p.rating || 4.3, count: 50 + ((p.id * 37) % 450) },
+    image: p.thumbnail || (p.images && p.images[0]) || null,
+  };
+}
+
 async function loadProducts() {
   try {
-    const res = await fetch(API_URL, { signal: AbortSignal.timeout(8000) });
-    if (!res.ok) throw new Error("API-Fehler " + res.status);
-    const data = await res.json();
-    // Klamotten zuerst, Rest dahinter – Preise grob in EUR umrechnen
-    products = data
-      .map((p) => ({ ...p, price: Math.round(p.price * EUR_PER_USD * 100) / 100 }))
-      .sort((a, b) => {
-        const aIsClothing = CLOTHING_CATEGORIES.includes(a.category) ? 0 : 1;
-        const bIsClothing = CLOTHING_CATEGORIES.includes(b.category) ? 0 : 1;
-        return aIsClothing - bIsClothing;
-      });
+    const results = await Promise.all(
+      Object.entries(SOURCE_CATEGORIES).map(async ([srcCat, cat]) => {
+        const res = await fetch(`${API_BASE}${srcCat}?limit=0`, {
+          signal: AbortSignal.timeout(8000),
+        });
+        if (!res.ok) throw new Error("API-Fehler " + res.status);
+        const data = await res.json();
+        return (data.products || []).map((p) => mapApiProduct(p, cat));
+      })
+    );
+    products = results.flat();
+    if (products.length === 0) throw new Error("Keine Produkte erhalten");
   } catch (err) {
     console.warn("Produkt-API nicht erreichbar, nutze Fallback-Katalog:", err);
-    products = FALLBACK_PRODUCTS;
+    products = [...FALLBACK_PRODUCTS, ...LUXURY_PRODUCTS];
   }
-  products = [...LUXURY_PRODUCTS, ...products];
   renderCategoryNav();
   renderProducts();
 }
 
 // ---------- Rendering: Shop ----------
 function renderCategoryNav() {
-  const cats = ["all", ...new Set(products.map((p) => p.category))];
+  const present = new Set(products.map((p) => p.category));
+  present.add("all");
+  if (products.some((p) => p.discount > 0)) present.add("sale");
+
   const nav = $("#category-nav");
   nav.innerHTML = "";
-  for (const cat of cats) {
+  for (const cat of CATEGORY_ORDER) {
+    if (!present.has(cat)) continue;
     const btn = document.createElement("button");
     btn.textContent = CATEGORY_LABELS[cat] || cat;
     btn.classList.toggle("active", cat === activeCategory);
+    btn.classList.toggle("sale-tab", cat === "sale");
     btn.addEventListener("click", () => {
       activeCategory = cat;
       renderCategoryNav();
@@ -178,13 +223,23 @@ function productImageHTML(p) {
   return `<span class="img-placeholder">${p.emoji || "🛍️"}</span>`;
 }
 
+function priceHTML(p) {
+  if (p.discount > 0) {
+    const oldPrice = p.price / (1 - p.discount / 100);
+    return `<span class="old-price">${formatEUR(oldPrice)}</span><span class="sale-price">${formatEUR(p.price)}</span>`;
+  }
+  return formatEUR(p.price);
+}
+
 function renderProducts() {
   const grid = $("#product-grid");
   grid.innerHTML = "";
 
   const visible = products.filter((p) => {
-    const matchesCat = activeCategory === "all" || p.category === activeCategory;
-    const matchesSearch = p.title.toLowerCase().includes(searchTerm);
+    const matchesCat =
+      activeCategory === "all" ||
+      (activeCategory === "sale" ? p.discount > 0 : p.category === activeCategory);
+    const matchesSearch = (p.brand + " " + p.title).toLowerCase().includes(searchTerm);
     return matchesCat && matchesSearch;
   });
 
@@ -194,31 +249,50 @@ function renderProducts() {
   }
 
   visible.forEach((p, i) => {
-    const isDeal = p.rating && p.rating.rate >= 4.5;
-    const oldPrice = isDeal ? p.price * 1.4 : null;
     const card = document.createElement("div");
     card.className = "product-card";
-    card.style.animationDelay = `${Math.min(i * 40, 400)}ms`;
+    card.style.animationDelay = `${Math.min(i * 30, 350)}ms`;
+    const badge =
+      p.discount > 0
+        ? `<span class="deal-badge">−${p.discount}%</span>`
+        : p.category === "luxus"
+          ? '<span class="lux-badge">PREMIUM</span>'
+          : "";
     card.innerHTML = `
       <div class="product-img">
-        ${isDeal ? '<span class="deal-badge">🔥 DEAL</span>' : ""}
+        ${badge}
+        <button class="wish-btn ${wishlist.has(String(p.id)) ? "active" : ""}" title="Merken">${wishlist.has(String(p.id)) ? "♥" : "♡"}</button>
         ${productImageHTML(p)}
+        <button class="quick-add">In den Warenkorb</button>
       </div>
       <div class="product-body">
+        <div class="product-brand">${p.brand || ""}</div>
         <div class="product-title">${p.title}</div>
         <div class="product-rating">${"★".repeat(Math.round(p.rating?.rate || 4))}${"☆".repeat(5 - Math.round(p.rating?.rate || 4))}
           <span class="muted">(${p.rating?.count || 0})</span></div>
-        <div class="product-footer">
-          <div class="product-price">
-            ${oldPrice ? `<span class="old-price">${formatEUR(oldPrice)}</span>` : ""}
-            ${formatEUR(p.price)}
-          </div>
-          <button class="add-btn" data-id="${p.id}">+ 🛒</button>
-        </div>
+        <div class="product-price">${priceHTML(p)}</div>
       </div>`;
-    card.querySelector(".add-btn").addEventListener("click", (e) => addToCart(p, e.currentTarget));
+    card.querySelector(".quick-add").addEventListener("click", (e) => addToCart(p, e.currentTarget));
+    card.querySelector(".wish-btn").addEventListener("click", (e) => toggleWish(p, e.currentTarget));
     grid.appendChild(card);
   });
+}
+
+// ---------- Merkliste ----------
+function toggleWish(product, btn) {
+  const key = String(product.id);
+  if (wishlist.has(key)) {
+    wishlist.delete(key);
+    btn.classList.remove("active");
+    btn.textContent = "♡";
+  } else {
+    wishlist.add(key);
+    btn.classList.add("active");
+    btn.textContent = "♥";
+    fireConfetti({ particleCount: 15, spread: 40, origin: btnOrigin(btn) });
+    toast("❤️ Gemerkt!");
+  }
+  saveJSON("shoppy_wishlist", [...wishlist]);
 }
 
 // ---------- Warenkorb ----------
@@ -236,7 +310,7 @@ function addToCart(product, btn) {
   } else {
     cart[key] = {
       id: product.id,
-      title: product.title,
+      title: (product.brand ? product.brand + " · " : "") + product.title,
       price: product.price,
       image: product.image || null,
       emoji: product.emoji || "🛍️",
@@ -348,49 +422,106 @@ function refillWallet() {
 }
 
 // ---------- Checkout ----------
-function openCheckout() {
-  $("#checkout-total").textContent = formatEUR(cartTotal());
-  $("#checkout-modal").classList.remove("hidden");
-}
-function closeCheckout() {
-  $("#checkout-modal").classList.add("hidden");
+function selectedShipping() {
+  const value = document.querySelector('input[name="ship"]:checked')?.value || "standard";
+  return SHIPPING_OPTIONS[value];
 }
 
 function selectedPayment() {
-  return document.querySelector('input[name="pay"]:checked')?.value || "spielgeld";
+  return document.querySelector('input[name="pay"]:checked')?.value || "invoice";
+}
+
+function renderCheckoutSummary() {
+  const shipping = selectedShipping();
+  $("#co-subtotal").textContent = formatEUR(cartTotal());
+  $("#co-shipping").textContent = shipping.cost > 0 ? formatEUR(shipping.cost) : "gratis";
+  $("#checkout-total").textContent = formatEUR(cartTotal() + shipping.cost);
+  $("#card-fields").classList.toggle("hidden", selectedPayment() !== "card");
+}
+
+function openCheckout() {
+  renderCheckoutSummary();
+  $("#co-processing").classList.add("hidden");
+  $("#co-actions").classList.remove("hidden");
+  $("#checkout-modal").classList.remove("hidden");
+}
+function closeCheckout() {
+  clearTimeout(coTimer);
+  $("#checkout-modal").classList.add("hidden");
+}
+
+function shippingAddress() {
+  const first = $("#addr-first").value.trim();
+  const last = $("#addr-last").value.trim();
+  const street = $("#addr-street").value.trim() || "Dopaminallee 7";
+  const zip = $("#addr-zip").value.trim() || "10115";
+  const city = $("#addr-city").value.trim() || "Berlin";
+  return `${first} ${last}, ${street}, ${zip} ${city}`.replace(/^ ,? ?/, "");
+}
+
+let coTimer = null;
+
+// Simulierter Zahlungs-Check (Kreditkarte): kleine Status-Schritte wie im echten Checkout
+function processCardPayment(total) {
+  const steps = [
+    "Karte wird geprüft…",
+    "3-D Secure: Identität wird bestätigt…",
+    "Zahlung wird autorisiert…",
+    "✅ Zahlung erfolgreich!",
+  ];
+  $("#co-actions").classList.add("hidden");
+  $("#co-processing").classList.remove("hidden");
+  let i = 0;
+  $("#co-processing-text").textContent = steps[i];
+  const next = () => {
+    i++;
+    if (i < steps.length) {
+      $("#co-processing-text").textContent = steps[i];
+      coTimer = setTimeout(next, i === steps.length - 1 ? 600 : 900);
+    } else {
+      finalizeOrder(total);
+    }
+  };
+  coTimer = setTimeout(next, 900);
 }
 
 function confirmPurchase() {
-  const total = cartTotal();
+  const shipping = selectedShipping();
+  const total = cartTotal() + shipping.cost;
   const method = selectedPayment();
 
   if (method === "playpal") {
     openPlayPal(total);
     return;
   }
+  if (method === "card") {
+    processCardPayment(total);
+    return;
+  }
   if (method === "spielgeld") {
     if (total > balance) {
-      toast("😅 Zu wenig Spielgeld! Tipp aufs 💰 oben – oder zahl per PlayPal. 😉");
+      toast("😅 Zu wenig Spielgeld! Tipp aufs 💰 oben – oder zahl auf Rechnung. 😉");
       return;
     }
     balance -= total;
     saveBalance();
     renderWallet();
   }
-  // "Wunschdenken" ist immer gedeckt ✨
+  // Rechnungskauf: zahlbar in 30 Tagen – oder nie 📄
   finalizeOrder(total);
 }
 
 function finalizeOrder(total) {
+  const shipping = selectedShipping();
   const driver = DRIVERS[Math.floor(Math.random() * DRIVERS.length)];
   activeOrder = {
     id: "SHPY-" + Date.now().toString(36).toUpperCase(),
     items: Object.values(cart),
     total,
-    address: $("#address-input").value || "Dopaminallee 7, 10115 Berlin",
+    address: shippingAddress(),
     driver,
     startedAt: Date.now(),
-    duration: DELIVERY_DURATION_MS,
+    duration: shipping.duration,
   };
   saveOrder();
 
@@ -400,6 +531,9 @@ function finalizeOrder(total) {
   closeCart();
   closeCheckout();
 
+  $("#success-details").innerHTML =
+    `Bestellnummer <strong>${activeOrder.id}</strong> · ${shipping.label} · ` +
+    `Gesamtsumme <strong>${formatEUR(total)}</strong>`;
   bigConfetti();
   $("#success-modal").classList.remove("hidden");
 }
@@ -639,6 +773,9 @@ $("#cancel-checkout").addEventListener("click", closeCheckout);
 $("#confirm-buy").addEventListener("click", confirmPurchase);
 $("#pp-pay").addEventListener("click", payWithPlayPal);
 $("#pp-cancel").addEventListener("click", closePlayPal);
+document.querySelectorAll('input[name="ship"], input[name="pay"]').forEach((input) =>
+  input.addEventListener("change", renderCheckoutSummary)
+);
 $("#goto-tracking").addEventListener("click", showTracking);
 $("#back-to-shop").addEventListener("click", showShop);
 $("#turbo-btn").addEventListener("click", turboDelivery);

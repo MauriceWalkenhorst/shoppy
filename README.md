@@ -8,13 +8,18 @@ Paket zugestellt wird. 🎉
 
 ## Was kann Shoppy?
 
-- 👗 **Echte Produkte**: Klamotten & mehr mit echten Produktfotos (Fake Store API)
-- 💎 **Luxus-Kategorie**: realistische Traum-Produkte von 980 € bis 24.999 €
+- 🛍️ **Zalando-artiger Look**: helles, cleanes Design mit Marken, Sale-Preisen,
+  Merkliste-Herz und Hover-"In den Warenkorb"
+- 👗 **Realistische Produkte**: Kleider, Hemden, Schuhe, Taschen, Uhren & Schmuck
+  mit echten Produktfotos (DummyJSON-API, mit Offline-Fallback)
+- 💎 **Luxus-Kategorie**: Uhren & Schmuck zu realistischen Luxus-Preisen
 - 🛒 **Warenkorb** mit Mengen, Animationen und Konfetti
-- 💰 **Spielgeld-Wallet**: Start mit 500 €, gratis auffüllbar per Klick aufs 💰
-- 🅿️ **PlayPal**: simulierte PayPal-artige Bezahlung mit 1 Mio. € Fantasie-Guthaben –
-  fühlt sich echt an, ist aber zu 100 % unecht
-- 💳 **Checkout** mit weiteren Fantasie-Zahlungsmethoden ("Spielgeld", "Wunschdenken")
+- 💳 **Realistischer Checkout**: Adressformular, Versandarten (Standard gratis /
+  Express / Same-Minute – bestimmt die simulierte Lieferzeit!), Zwischensumme,
+  MwSt.-Ausweis und "Zahlungspflichtig bestellen"
+- 🅿️ **Zahlungsarten**: Kauf auf Rechnung, PlayPal (simuliertes PayPal mit
+  1 Mio. € Fantasie-Guthaben), Kreditkarte mit simulierter 3-D-Secure-Prüfung,
+  Spielgeld-Wallet (Start: 500 €, gratis auffüllbar)
 - 🛵 **Live-Liefer-Tracking**: Fahrer mit Name & Fahrzeug bewegt sich in Echtzeit
   auf einer OpenStreetMap-Karte durch Berlin, mit ETA-Countdown, Status-Schritten
   und Live-Feed ("Murat hat einen Hund gestreichelt 🐕")

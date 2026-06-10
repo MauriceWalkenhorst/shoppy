@@ -17,6 +17,7 @@
 
   <!-- ===== Header ===== -->
   <header class="header">
+    <div class="usp-bar">Gratis Versand &amp; Rückversand · 100 Tage Rückgaberecht · Bezahlt wird nur mit Spielgeld 😉</div>
     <div class="header-inner">
       <a class="logo" href="#" id="logo-link">🛍️ <span>Shoppy</span></a>
 
@@ -40,8 +41,8 @@
   <!-- ===== Hauptbereich: Shop ===== -->
   <main id="view-shop" class="view">
     <section class="hero">
-      <h1>Shoppen wie im Rausch.<br><span class="accent">Ohne einen Cent auszugeben.</span></h1>
-      <p>Echte Produkte. Echtes Shopping-Gefühl. Echtes Liefer-Tracking. Nur das Geld ist Spielgeld. 😎</p>
+      <h1>Neu eingetroffen: <span class="accent">Die Trends der Saison</span></h1>
+      <p>Echtes Shopping-Gefühl mit Live-Liefer-Tracking – nur das Geld ist Spielgeld. 😎</p>
     </section>
 
     <div class="product-grid" id="product-grid">
@@ -117,33 +118,70 @@
 
   <!-- ===== Checkout-Modal ===== -->
   <div class="modal-backdrop hidden" id="checkout-modal">
-    <div class="modal">
-      <h2>Kasse 💳</h2>
-      <p class="muted">Keine Sorge – hier wird nur Spielgeld verbrannt.</p>
+    <div class="modal checkout-modal">
+      <h2>Kasse</h2>
+      <p class="muted">🔒 Sichere Simulation – es wird niemals echtes Geld abgebucht.</p>
 
-      <label class="field">
-        <span>Lieferadresse</span>
-        <input type="text" id="address-input" value="Dopaminallee 7, 10115 Berlin" />
-      </label>
-
-      <div class="field">
-        <span>Zahlungsmethode</span>
-        <div class="pay-options">
-          <label><input type="radio" name="pay" value="spielgeld" checked /> 💰 Spielgeld-Wallet</label>
-          <label><input type="radio" name="pay" value="playpal" /> 🅿️ PlayPal <span class="muted">(wie PayPal – nur 100 % unecht)</span></label>
-          <label><input type="radio" name="pay" value="wunsch" /> 🧚 Wunschdenken</label>
-        </div>
+      <h3 class="co-section">1 · Lieferadresse</h3>
+      <div class="addr-grid">
+        <label class="field"><span>Vorname</span><input type="text" id="addr-first" value="Maurice" /></label>
+        <label class="field"><span>Nachname</span><input type="text" id="addr-last" value="Walkenhorst" /></label>
+        <label class="field wide"><span>Straße &amp; Hausnummer</span><input type="text" id="addr-street" value="Dopaminallee 7" /></label>
+        <label class="field"><span>PLZ</span><input type="text" id="addr-zip" value="10115" /></label>
+        <label class="field"><span>Stadt</span><input type="text" id="addr-city" value="Berlin" /></label>
       </div>
 
-      <div class="checkout-total">
-        <span>Zu zahlen:</span>
-        <strong id="checkout-total">0,00 €</strong>
+      <h3 class="co-section">2 · Versandart</h3>
+      <div class="pay-options" id="shipping-options">
+        <label><input type="radio" name="ship" value="standard" checked />
+          <span class="opt-text"><strong>Standardversand</strong> · gratis<br /><small>Lieferung in ca. 5 Minuten (simuliert)</small></span>
+        </label>
+        <label><input type="radio" name="ship" value="express" />
+          <span class="opt-text"><strong>Expressversand</strong> · 4,90 €<br /><small>Lieferung in ca. 2 Minuten (simuliert)</small></span>
+        </label>
+        <label><input type="radio" name="ship" value="sameday" />
+          <span class="opt-text"><strong>Same-Minute-Delivery</strong> · 9,90 €<br /><small>Lieferung in ca. 1 Minute (simuliert)</small></span>
+        </label>
       </div>
 
-      <div class="modal-actions">
+      <h3 class="co-section">3 · Zahlungsart</h3>
+      <div class="pay-options">
+        <label><input type="radio" name="pay" value="invoice" checked />
+          <span class="opt-text"><strong>📄 Kauf auf Rechnung</strong><br /><small>Zahle in 30 Tagen – oder nie. Es ist eh Spielgeld.</small></span>
+        </label>
+        <label><input type="radio" name="pay" value="playpal" />
+          <span class="opt-text"><strong>🅿️ PlayPal</strong><br /><small>PayPal-Gefühl, 100 % Simulation, 1 Mio. € Guthaben</small></span>
+        </label>
+        <label><input type="radio" name="pay" value="card" />
+          <span class="opt-text"><strong>💳 Kreditkarte</strong><br /><small>Mit simulierter 3-D-Secure-Prüfung</small></span>
+        </label>
+        <label><input type="radio" name="pay" value="spielgeld" />
+          <span class="opt-text"><strong>💰 Spielgeld-Wallet</strong><br /><small>Dein aufladbares Guthaben oben rechts</small></span>
+        </label>
+      </div>
+
+      <div class="card-fields hidden" id="card-fields">
+        <label class="field wide"><span>Karteninhaber</span><input type="text" id="card-name" value="Maurice Walkenhorst" /></label>
+        <label class="field wide"><span>Kartennummer (Test-Karte)</span><input type="text" id="card-number" value="4242 4242 4242 4242" maxlength="19" /></label>
+        <label class="field"><span>Gültig bis</span><input type="text" id="card-expiry" value="12/29" maxlength="5" /></label>
+        <label class="field"><span>CVC</span><input type="text" id="card-cvc" value="123" maxlength="4" /></label>
+      </div>
+
+      <div class="co-summary">
+        <div><span>Zwischensumme</span><span id="co-subtotal">0,00 €</span></div>
+        <div><span>Versand</span><span id="co-shipping">gratis</span></div>
+        <div class="co-total"><span>Gesamtsumme <small>inkl. 19 % MwSt.</small></span><strong id="checkout-total">0,00 €</strong></div>
+      </div>
+
+      <div class="co-processing hidden" id="co-processing">
+        <span class="pp-spinner"></span> <span id="co-processing-text">Zahlung wird geprüft…</span>
+      </div>
+
+      <div class="modal-actions" id="co-actions">
         <button class="ghost-btn" id="cancel-checkout">Abbrechen</button>
-        <button class="buy-btn" id="confirm-buy">Jetzt kaufen 🚀</button>
+        <button class="buy-btn" id="confirm-buy">Zahlungspflichtig bestellen</button>
       </div>
+      <p class="co-legal">Mit der Bestellung akzeptierst du unsere Fantasie-AGB. Widerruf jederzeit durch Schließen des Tabs. 😄</p>
     </div>
   </div>
 
@@ -181,9 +219,10 @@
   <div class="modal-backdrop hidden" id="success-modal">
     <div class="modal success-modal">
       <div class="success-emoji">🎉</div>
-      <h2>Bestellung erfolgreich!</h2>
-      <p>Dein Paket ist auf dem Weg. Der Dopamin-Express rollt!</p>
-      <button class="buy-btn" id="goto-tracking">📍 Fahrer live verfolgen</button>
+      <h2>Vielen Dank für deine Bestellung!</h2>
+      <p id="success-details">Deine Bestellung wurde bestätigt.</p>
+      <p>Eine (imaginäre) Bestellbestätigung ist unterwegs in dein Postfach.</p>
+      <button class="buy-btn" id="goto-tracking">📍 Lieferung live verfolgen</button>
     </div>
   </div>
 
