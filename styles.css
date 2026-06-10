@@ -131,7 +131,9 @@ button { font-family: inherit; cursor: pointer; }
   display: flex;
   gap: 26px;
   overflow-x: auto;
+  scrollbar-width: none;
 }
+.category-nav::-webkit-scrollbar { display: none; }
 .category-nav button {
   background: none;
   border: none;
@@ -819,7 +821,7 @@ button { font-family: inherit; cursor: pointer; }
 /* ===== Toasts ===== */
 .toast-container {
   position: fixed;
-  bottom: 24px;
+  bottom: calc(20px + env(safe-area-inset-bottom, 0px));
   left: 50%;
   transform: translateX(-50%);
   z-index: 500;
@@ -860,4 +862,54 @@ button { font-family: inherit; cursor: pointer; }
 }
 @keyframes toastOut {
   to { opacity: 0; transform: translateY(10px); }
+}
+
+/* ===== Mobile ===== */
+@media (max-width: 640px) {
+  .usp-bar { font-size: 0.68rem; padding: 6px 10px; }
+
+  /* Header: Logo + Icons oben, Suche in eigener Zeile darunter */
+  .header-inner {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding: 10px 12px;
+  }
+  .search-wrap { order: 3; flex-basis: 100%; max-width: none; }
+  .header-actions { margin-left: auto; }
+  .wallet { padding: 8px 11px; font-size: 0.82rem; }
+  .logo { font-size: 1.3rem; }
+
+  /* iOS zoomt bei Eingabefeldern unter 16px – das verhindern wir */
+  .search-wrap input,
+  .field input[type="text"] { font-size: 16px; }
+
+  .category-nav { gap: 18px; padding: 0 12px; }
+  .category-nav button { font-size: 0.88rem; padding-bottom: 10px; }
+
+  .view { padding: 14px 12px 70px; }
+  .hero { padding: 16px 4px 14px; }
+  .hero p { font-size: 0.86rem; }
+
+  /* Zwei Produkte pro Reihe wie in echten Shopping-Apps */
+  .product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px 10px;
+  }
+  .product-brand { font-size: 0.7rem; }
+  .product-title { font-size: 0.78rem; }
+  .product-rating { font-size: 0.72rem; }
+  .product-price { font-size: 0.86rem; }
+  .wish-btn { width: 34px; height: 34px; }
+  .quick-add { font-size: 0.78rem; padding: 11px 8px; }
+  .deal-badge, .lux-badge { font-size: 0.66rem; }
+
+  .qty-controls button { width: 32px; height: 32px; }
+
+  .modal-backdrop { padding: 10px; }
+  .modal { padding: 20px 16px; }
+  .checkout-modal { max-height: 94vh; }
+
+  .tracking-map-wrap { min-height: 360px; }
+  #map { height: 360px; }
+  .eta-time { font-size: 1.8rem; }
 }

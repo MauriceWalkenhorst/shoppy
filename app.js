@@ -16,6 +16,10 @@ const SOURCE_CATEGORIES = {
   "mens-shoes": "schuhe",
   "womens-bags": "accessoires",
   "sunglasses": "accessoires",
+  "beauty": "beauty",
+  "fragrances": "beauty",
+  "skin-care": "beauty",
+  "sports-accessories": "sport",
   "womens-watches": "luxus",
   "mens-watches": "luxus",
   "womens-jewellery": "luxus",
@@ -26,10 +30,12 @@ const CATEGORY_LABELS = {
   herren: "Herren",
   schuhe: "Schuhe",
   accessoires: "Accessoires",
+  beauty: "Beauty",
+  sport: "Sport",
   luxus: "💎 Luxus",
   sale: "% Sale",
 };
-const CATEGORY_ORDER = ["all", "damen", "herren", "schuhe", "accessoires", "luxus", "sale"];
+const CATEGORY_ORDER = ["all", "damen", "herren", "schuhe", "accessoires", "beauty", "sport", "luxus", "sale"];
 const FAKE_BRANDS = ["NORDMARK", "ELARA", "KIONO", "WESTBROOK & CO.", "ATELIER NEUF", "VELA STUDIO"];
 const PLAYPAL_START_BALANCE = 1_000_000;
 const START_BALANCE = 500;
@@ -171,21 +177,19 @@ function mapApiProduct(p, category) {
 }
 
 async function loadProducts() {
-  try {
-    const results = await Promise.all(
-      Object.entries(SOURCE_CATEGORIES).map(async ([srcCat, cat]) => {
-        const res = await fetch(`${API_BASE}${srcCat}?limit=0`, {
-          signal: AbortSignal.timeout(8000),
-        });
-        if (!res.ok) throw new Error("API-Fehler " + res.status);
-        const data = await res.json();
-        return (data.products || []).map((p) => mapApiProduct(p, cat));
-      })
-    );
-    products = results.flat();
-    if (products.length === 0) throw new Error("Keine Produkte erhalten");
-  } catch (err) {
-    console.warn("Produkt-API nicht erreichbar, nutze Fallback-Katalog:", err);
+  const results = await Promise.allSettled(
+    Object.entries(SOURCE_CATEGORIES).map(async ([srcCat, cat]) => {
+      const res = await fetch(`${API_BASE}${srcCat}?limit=0`, {
+        signal: AbortSignal.timeout(8000),
+      });
+      if (!res.ok) throw new Error("API-Fehler " + res.status);
+      const data = await res.json();
+      return (data.products || []).map((p) => mapApiProduct(p, cat));
+    })
+  );
+  products = results.filter((r) => r.status === "fulfilled").flatMap((r) => r.value);
+  if (products.length === 0) {
+    console.warn("Produkt-API nicht erreichbar, nutze Fallback-Katalog");
     products = [...FALLBACK_PRODUCTS, ...LUXURY_PRODUCTS];
   }
   renderCategoryNav();

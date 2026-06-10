@@ -4,7 +4,7 @@
 
 "use strict";
 
-const CACHE_NAME = "shoppy-v2";
+const CACHE_NAME = "shoppy-v3";
 const APP_SHELL = [
   ".",
   "index.html",
