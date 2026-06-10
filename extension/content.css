@@ -1,0 +1,28 @@
+#shoppy-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 2147483647;
+  display: none;
+  background: linear-gradient(135deg, #ff4d6d, #ff7a5c);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 14px 20px;
+  font: 700 14px/1 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+#shoppy-fab:hover {
+  transform: scale(1.05);
+}
+
+#shoppy-fab:active {
+  transform: scale(0.95);
+}
+
+#shoppy-fab.shoppy-added {
+  background: #2dd881;
+}

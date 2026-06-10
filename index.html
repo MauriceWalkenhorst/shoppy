@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shoppy – Shoppen ohne Reue 🛍️</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛍️</text></svg>" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ===== Header ===== -->
+  <header class="header">
+    <div class="header-inner">
+      <a class="logo" href="#" id="logo-link">🛍️ <span>Shoppy</span></a>
+
+      <div class="search-wrap">
+        <input type="search" id="search-input" placeholder="Klamotten suchen…" autocomplete="off" />
+      </div>
+
+      <div class="header-actions">
+        <button class="wallet" id="wallet-btn" title="Spielgeld auffüllen">
+          💰 <span id="wallet-balance">0 €</span>
+        </button>
+        <button class="cart-btn" id="cart-btn">
+          🛒
+          <span class="cart-badge hidden" id="cart-badge">0</span>
+        </button>
+      </div>
+    </div>
+    <nav class="category-nav" id="category-nav"></nav>
+  </header>
+
+  <!-- ===== Hauptbereich: Shop ===== -->
+  <main id="view-shop" class="view">
+    <section class="hero">
+      <h1>Shoppen wie im Rausch.<br><span class="accent">Ohne einen Cent auszugeben.</span></h1>
+      <p>Echte Produkte. Echtes Shopping-Gefühl. Echtes Liefer-Tracking. Nur das Geld ist Spielgeld. 😎</p>
+    </section>
+
+    <div class="product-grid" id="product-grid">
+      <div class="loading" id="loading">⏳ Lade die heißesten Drops…</div>
+    </div>
+  </main>
+
+  <!-- ===== Tracking-Ansicht ===== -->
+  <main id="view-tracking" class="view hidden">
+    <button class="back-btn" id="back-to-shop">← Weiter shoppen</button>
+
+    <div class="tracking-layout">
+      <div class="tracking-info">
+        <h2 id="tracking-title">Deine Bestellung ist unterwegs!</h2>
+        <div class="eta-box">
+          <div class="eta-label">Ankunft in</div>
+          <div class="eta-time" id="eta-time">--:--</div>
+        </div>
+
+        <div class="driver-card">
+          <div class="driver-avatar" id="driver-avatar">🛵</div>
+          <div>
+            <div class="driver-name" id="driver-name">Fahrer</div>
+            <div class="driver-vehicle" id="driver-vehicle">unterwegs zu dir</div>
+            <div class="driver-rating">★★★★★ <span class="muted">(1.337 Bewertungen)</span></div>
+          </div>
+          <button class="turbo-btn" id="turbo-btn" title="Lieferung beschleunigen">⚡ Turbo</button>
+        </div>
+
+        <ol class="status-steps" id="status-steps">
+          <li data-step="0"><span class="step-dot"></span> Bestellung eingegangen</li>
+          <li data-step="1"><span class="step-dot"></span> Paket wird gepackt 📦</li>
+          <li data-step="2"><span class="step-dot"></span> Fahrer hat abgeholt 🛵</li>
+          <li data-step="3"><span class="step-dot"></span> Fast da! 🔔</li>
+          <li data-step="4"><span class="step-dot"></span> Zugestellt 🎉</li>
+        </ol>
+
+        <div class="live-feed" id="live-feed"></div>
+
+        <div class="order-summary-mini" id="tracking-items"></div>
+      </div>
+
+      <div class="tracking-map-wrap">
+        <div id="map"></div>
+        <!-- Fallback, falls die Karte nicht laden kann -->
+        <div id="map-fallback" class="map-fallback hidden">
+          <div class="road">
+            <span class="road-start">📦</span>
+            <span class="road-driver" id="fallback-driver">🛵</span>
+            <span class="road-end">🏠</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== Warenkorb (Drawer) ===== -->
+  <div class="drawer-backdrop hidden" id="drawer-backdrop"></div>
+  <aside class="cart-drawer" id="cart-drawer">
+    <div class="drawer-header">
+      <h2>🛒 Dein Warenkorb</h2>
+      <button class="close-btn" id="close-cart">✕</button>
+    </div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-footer">
+      <div class="cart-total-row">
+        <span>Gesamt</span>
+        <strong id="cart-total">0,00 €</strong>
+      </div>
+      <button class="checkout-btn" id="checkout-btn" disabled>Zur Kasse 💳</button>
+    </div>
+  </aside>
+
+  <!-- ===== Checkout-Modal ===== -->
+  <div class="modal-backdrop hidden" id="checkout-modal">
+    <div class="modal">
+      <h2>Kasse 💳</h2>
+      <p class="muted">Keine Sorge – hier wird nur Spielgeld verbrannt.</p>
+
+      <label class="field">
+        <span>Lieferadresse</span>
+        <input type="text" id="address-input" value="Dopaminallee 7, 10115 Berlin" />
+      </label>
+
+      <div class="field">
+        <span>Zahlungsmethode</span>
+        <div class="pay-options">
+          <label><input type="radio" name="pay" checked /> 💰 Spielgeld</label>
+          <label><input type="radio" name="pay" /> 🪙 Fantasie-Coins</label>
+          <label><input type="radio" name="pay" /> 🧚 Wunschdenken</label>
+        </div>
+      </div>
+
+      <div class="checkout-total">
+        <span>Zu zahlen:</span>
+        <strong id="checkout-total">0,00 €</strong>
+      </div>
+
+      <div class="modal-actions">
+        <button class="ghost-btn" id="cancel-checkout">Abbrechen</button>
+        <button class="buy-btn" id="confirm-buy">Jetzt kaufen 🚀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Bestellbestätigung ===== -->
+  <div class="modal-backdrop hidden" id="success-modal">
+    <div class="modal success-modal">
+      <div class="success-emoji">🎉</div>
+      <h2>Bestellung erfolgreich!</h2>
+      <p>Dein Paket ist auf dem Weg. Der Dopamin-Express rollt!</p>
+      <button class="buy-btn" id="goto-tracking">📍 Fahrer live verfolgen</button>
+    </div>
+  </div>
+
+  <!-- Toast-Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

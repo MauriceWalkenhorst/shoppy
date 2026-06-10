@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "Shoppy – Fake-Shoppen in echten Shops",
+  "version": "1.0.0",
+  "description": "Packe echte Produkte von Zara, Amazon & Zalando in deinen Spielgeld-Warenkorb. Shopping-Dopamin ohne einen Cent auszugeben.",
+  "permissions": ["storage"],
+  "host_permissions": [],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.amazon.de/*",
+        "*://*.amazon.com/*",
+        "*://*.zalando.de/*",
+        "*://*.zalando.at/*",
+        "*://*.zalando.ch/*",
+        "*://*.zara.com/*",
+        "*://*.hm.com/*",
+        "*://*.aboutyou.de/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Shoppy-Warenkorb öffnen"
+  }
+}
