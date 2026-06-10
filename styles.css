@@ -442,6 +442,7 @@ button { font-family: inherit; cursor: pointer; }
   outline: none;
 }
 .field input[type="text"]:focus { border-color: var(--text); box-shadow: 0 0 0 1px var(--text); }
+.field input.invalid { border-color: var(--sale); box-shadow: 0 0 0 1px var(--sale); }
 
 .pay-options { display: flex; flex-direction: column; gap: 8px; }
 .pay-options label {
@@ -783,6 +784,24 @@ button { font-family: inherit; cursor: pointer; }
 }
 #map { width: 100%; height: 520px; background: var(--surface-2); }
 
+.map-eta {
+  display: none;
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1100; /* über den Leaflet-Ebenen */
+  background: var(--dark);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 9px 16px;
+  border-radius: 999px;
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.3);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .driver-marker { font-size: 30px; filter: drop-shadow(0 3px 4px rgba(0,0,0,0.4)); }
 .home-marker, .store-marker { font-size: 26px; }
 
@@ -909,7 +928,12 @@ button { font-family: inherit; cursor: pointer; }
   .modal { padding: 20px 16px; }
   .checkout-modal { max-height: 94vh; }
 
-  .tracking-map-wrap { min-height: 360px; }
-  #map { height: 360px; }
+  /* Tracking wie in einer Liefer-App: Karte zuerst, ETA als Chip darauf */
+  .tracking-layout { display: flex; flex-direction: column; gap: 14px; }
+  .tracking-map-wrap { order: -1; min-height: 0; }
+  #map { height: 48vh; min-height: 300px; }
+  .map-eta { display: block; }
+  .eta-box { display: none; }
   .eta-time { font-size: 1.8rem; }
+  .tracking-info { padding: 16px; gap: 14px; }
 }

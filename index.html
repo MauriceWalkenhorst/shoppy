@@ -86,6 +86,7 @@
       </div>
 
       <div class="tracking-map-wrap">
+        <div class="map-eta" id="map-eta">🛵 Ankunft in --:--</div>
         <div id="map"></div>
         <!-- Fallback, falls die Karte nicht laden kann -->
         <div id="map-fallback" class="map-fallback hidden">
@@ -124,11 +125,11 @@
 
       <h3 class="co-section">1 · Lieferadresse</h3>
       <div class="addr-grid">
-        <label class="field"><span>Vorname</span><input type="text" id="addr-first" value="Maurice" /></label>
-        <label class="field"><span>Nachname</span><input type="text" id="addr-last" value="Walkenhorst" /></label>
-        <label class="field wide"><span>Straße &amp; Hausnummer</span><input type="text" id="addr-street" value="Dopaminallee 7" /></label>
-        <label class="field"><span>PLZ</span><input type="text" id="addr-zip" value="10115" /></label>
-        <label class="field"><span>Stadt</span><input type="text" id="addr-city" value="Berlin" /></label>
+        <label class="field"><span>Vorname *</span><input type="text" id="addr-first" placeholder="Max" autocomplete="given-name" /></label>
+        <label class="field"><span>Nachname *</span><input type="text" id="addr-last" placeholder="Mustermann" autocomplete="family-name" /></label>
+        <label class="field wide"><span>Straße &amp; Hausnummer *</span><input type="text" id="addr-street" placeholder="Musterstraße 1" autocomplete="street-address" /></label>
+        <label class="field"><span>PLZ *</span><input type="text" id="addr-zip" placeholder="10115" inputmode="numeric" autocomplete="postal-code" /></label>
+        <label class="field"><span>Stadt *</span><input type="text" id="addr-city" placeholder="Berlin" autocomplete="address-level2" /></label>
       </div>
 
       <h3 class="co-section">2 · Versandart</h3>
@@ -161,7 +162,7 @@
       </div>
 
       <div class="card-fields hidden" id="card-fields">
-        <label class="field wide"><span>Karteninhaber</span><input type="text" id="card-name" value="Maurice Walkenhorst" /></label>
+        <label class="field wide"><span>Karteninhaber *</span><input type="text" id="card-name" placeholder="Max Mustermann" autocomplete="cc-name" /></label>
         <label class="field wide"><span>Kartennummer (Test-Karte)</span><input type="text" id="card-number" value="4242 4242 4242 4242" maxlength="19" /></label>
         <label class="field"><span>Gültig bis</span><input type="text" id="card-expiry" value="12/29" maxlength="5" /></label>
         <label class="field"><span>CVC</span><input type="text" id="card-cvc" value="123" maxlength="4" /></label>

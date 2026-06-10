@@ -457,10 +457,31 @@ function closeCheckout() {
 function shippingAddress() {
   const first = $("#addr-first").value.trim();
   const last = $("#addr-last").value.trim();
-  const street = $("#addr-street").value.trim() || "Dopaminallee 7";
-  const zip = $("#addr-zip").value.trim() || "10115";
-  const city = $("#addr-city").value.trim() || "Berlin";
-  return `${first} ${last}, ${street}, ${zip} ${city}`.replace(/^ ,? ?/, "");
+  const street = $("#addr-street").value.trim();
+  const zip = $("#addr-zip").value.trim();
+  const city = $("#addr-city").value.trim();
+  return `${first} ${last}, ${street}, ${zip} ${city}`;
+}
+
+// Pflichtfelder prüfen – wie im echten Checkout
+function validateCheckout() {
+  const required = ["#addr-first", "#addr-last", "#addr-street", "#addr-zip", "#addr-city"];
+  if (selectedPayment() === "card") required.push("#card-name");
+
+  let firstInvalid = null;
+  for (const sel of required) {
+    const input = $(sel);
+    const empty = input.value.trim() === "";
+    input.classList.toggle("invalid", empty);
+    if (empty && !firstInvalid) firstInvalid = input;
+  }
+  if (firstInvalid) {
+    toast("✏️ Bitte fülle Name und Lieferadresse aus.");
+    firstInvalid.scrollIntoView({ behavior: "smooth", block: "center" });
+    firstInvalid.focus({ preventScroll: true });
+    return false;
+  }
+  return true;
 }
 
 let coTimer = null;
@@ -490,6 +511,7 @@ function processCardPayment(total) {
 }
 
 function confirmPurchase() {
+  if (!validateCheckout()) return;
   const shipping = selectedShipping();
   const total = cartTotal() + shipping.cost;
   const method = selectedPayment();
@@ -679,6 +701,17 @@ function startDeliverySim(order) {
         icon: L.divIcon({ className: "driver-marker", html: "🛵", iconSize: [30, 30] }),
       }).addTo(sim.map).bindPopup(order.driver.name + " ist unterwegs!");
       sim.map.fitBounds(L.latLngBounds(route).pad(0.15));
+
+      // iOS/Mobile-Fix: Leaflet rendert grau, wenn die Karte beim Init
+      // noch keine endgültige Größe hat – nach dem Layout neu vermessen
+      setTimeout(() => {
+        if (!sim.map) return;
+        sim.map.invalidateSize();
+        sim.map.fitBounds(L.latLngBounds(route).pad(0.15));
+      }, 150);
+      sim.onResize = () => sim.map && sim.map.invalidateSize();
+      window.addEventListener("resize", sim.onResize);
+      window.addEventListener("orientationchange", sim.onResize);
     } catch (e) {
       console.warn("Karte konnte nicht initialisiert werden:", e);
       sim.map = null;
@@ -705,8 +738,9 @@ function tickDelivery(sim) {
   const remainingMs = Math.max(0, sim.order.duration - (Date.now() - sim.order.startedAt));
   const mins = Math.floor(remainingMs / 60000);
   const secs = Math.floor((remainingMs % 60000) / 1000);
-  $("#eta-time").textContent =
-    t >= 1 ? "🎉 Da!" : `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  const etaText = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  $("#eta-time").textContent = t >= 1 ? "🎉 Da!" : etaText;
+  $("#map-eta").textContent = t >= 1 ? "🎉 Zugestellt!" : `🛵 Ankunft in ${etaText}`;
 
   // Status-Schritte: 0 bestellt, 1 gepackt, 2 abgeholt, 3 fast da, 4 zugestellt
   const step = t >= 1 ? 4 : t >= 0.8 ? 3 : t >= 0.12 ? 2 : t >= 0.04 ? 1 : 0;
@@ -761,6 +795,10 @@ function turboDelivery() {
 function stopDeliverySim() {
   if (!deliverySim) return;
   clearInterval(deliverySim.interval);
+  if (deliverySim.onResize) {
+    window.removeEventListener("resize", deliverySim.onResize);
+    window.removeEventListener("orientationchange", deliverySim.onResize);
+  }
   if (deliverySim.map) {
     deliverySim.map.remove();
   }
@@ -779,6 +817,10 @@ $("#pp-pay").addEventListener("click", payWithPlayPal);
 $("#pp-cancel").addEventListener("click", closePlayPal);
 document.querySelectorAll('input[name="ship"], input[name="pay"]').forEach((input) =>
   input.addEventListener("change", renderCheckoutSummary)
+);
+// Rote Markierung verschwindet, sobald man tippt
+document.querySelectorAll(".addr-grid input, .card-fields input").forEach((input) =>
+  input.addEventListener("input", () => input.classList.remove("invalid"))
 );
 $("#goto-tracking").addEventListener("click", showTracking);
 $("#back-to-shop").addEventListener("click", showShop);
